@@ -27,24 +27,23 @@
  * */
 class CodePax_DbVersioning_Environments_Factory
 {
-
     /**
      * Create the appropriate object by the
      * supplied environment
      *
-     * @param string $_environment prod/stg/dev
+     * @param CodePax_Config $configuration
      * @return CodePax_DbVersioning_Environments_Abstract
      * @throws CodePax_DbVersioning_Exception unsupported development environment
      * */
-    public static function factory($_environment)
+    public static function factory(CodePax_Config $configuration)
     {
-        switch (strtolower($_environment)) {
+        switch (strtolower($configuration->application_environment)) {
             case 'prod':
-                return new CodePax_DbVersioning_Environments_Prod();
+                return new CodePax_DbVersioning_Environments_Prod($configuration);
             case 'stg':
-                return new CodePax_DbVersioning_Environments_Stg();
+                return new CodePax_DbVersioning_Environments_Stg($configuration);
             case 'dev':
-                return new CodePax_DbVersioning_Environments_Dev();
+                return new CodePax_DbVersioning_Environments_Dev($configuration);
             default:
                 throw new CodePax_DbVersioning_Exception('Unsupported development environment');
         }

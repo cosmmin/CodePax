@@ -36,7 +36,7 @@ class CodePax_DbVersioning_SqlEngines_MySql extends CodePax_DbVersioning_SqlEngi
     public function executeChangeScript($_sql_file)
     {
         $command_pattern = '%s --user=%s --password=%s --database=%s --host=%s < %s';
-        $shell_command = sprintf($command_pattern, PATH_TO_SQL_BIN, DB_USER, DB_PASS, DB_NAME, DB_HOST, $_sql_file);
+        $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_name, $this->configuration->db_host, $_sql_file);
         $this->runCommand($shell_command);
     }
 
@@ -57,11 +57,11 @@ class CodePax_DbVersioning_SqlEngines_MySql extends CodePax_DbVersioning_SqlEngi
         $create_command_pattern = '%s --user=%s --password=%s --host=%s --execute="CREATE DATABASE ' . $database_specifier . '"';
 
         // first drop the existing DB
-        $drop_shell_command = sprintf($drop_command_pattern, PATH_TO_SQL_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME);
+        $drop_shell_command = sprintf($drop_command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name);
         $this->runCommand($drop_shell_command);
 
         // then recreate it from baseline
-        $create_shell_command = sprintf($create_command_pattern, PATH_TO_SQL_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME);
+        $create_shell_command = sprintf($create_command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name);
         $this->runCommand($create_shell_command);
     }
 
@@ -96,11 +96,11 @@ class CodePax_DbVersioning_SqlEngines_MySql extends CodePax_DbVersioning_SqlEngi
     {
         if ($this->is_windows === true) {
             $command_pattern = '%s --user=%s --password=%s --host=%s --routines --no-data --triggers %s --result-file=%s';
-            $shell_command = sprintf($command_pattern, PATH_TO_SQL_DUMP_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME, $_target_sql_file);
+            $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_dump_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name, $_target_sql_file);
         } else {// on Unix, also clean-up the dump
             $command_pattern = "%s --user=%s --password=%s --host=%s --routines --no-data --triggers %s |
 				sed 's/`%s`\.//g' | sed 's/\/\*\![0-9]* DEFINER=[^*]*\*\///g' | tee %s";
-            $shell_command = sprintf($command_pattern, PATH_TO_SQL_DUMP_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME, DB_NAME, $_target_sql_file);
+            $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_dump_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name, $this->configuration->db_name, $_target_sql_file);
         }
         $this->runCommand($shell_command);
     }
@@ -123,7 +123,7 @@ class CodePax_DbVersioning_SqlEngines_MySql extends CodePax_DbVersioning_SqlEngi
         $ignore_pattern = $this->getIgnoreTablesOption('--ignore-table=%s.%s');
         $command_pattern = '%s --user=%s --password=%s --host=%s --skip-triggers --skip-disable-keys ';
         $command_pattern .= '--no-create-info --complete-insert %s %s --result-file=%s';
-        $shell_command = sprintf($command_pattern, PATH_TO_SQL_DUMP_BIN, DB_USER, DB_PASS, DB_HOST, $ignore_pattern, DB_NAME, $_target_sql_file);
+        $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_dump_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $ignore_pattern, $this->configuration->db_name, $_target_sql_file);
         $this->runCommand($shell_command);
     }
 
@@ -136,7 +136,7 @@ class CodePax_DbVersioning_SqlEngines_MySql extends CodePax_DbVersioning_SqlEngi
      * time to load the test data and that's
      * why a separate method was created
      *
-     * @param string $_test_data_file path to test data
+     * @param string $_sql_file path to test data
      * @return void
      * */
     protected function loadSqlTestDataFile($_sql_file)

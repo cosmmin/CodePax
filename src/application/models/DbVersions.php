@@ -54,17 +54,18 @@ class CodePax_DbVersions
      * This should be moved into a dedicated class
      * when the second model should be added
      *
+     * @param CodePax_Config $configuration
      * @return CodePax_DbVersions_Interface
      * */
-    public static function factory()
+    public static function factory($configuration)
     {
         switch (DB_ENGINE) {
             case 'mysql':
-                return new CodePax_DbVersions_MySql();
+                return new CodePax_DbVersions_MySql($configuration);
             case 'pgsql':
-                return new CodePax_DbVersions_PgSql();
+                return new CodePax_DbVersions_PgSql($configuration);
             case 'sqlsrv':
-                return new CodePax_DbVersions_SqlSrv();
+                return new CodePax_DbVersions_SqlSrv($configuration);
         }
     }
 

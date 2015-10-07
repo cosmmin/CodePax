@@ -33,18 +33,21 @@ class CodePax_DbVersioning_SqlEngines_Factory
     /**
      * Generate the concrete DB instance
      *
+     * @param CodePax_Config $configuration
+     *
      * @return CodePax_DbVersioning_SqlEngines_Abstract
+     *
      * @throws CodePax_DbVersioning_Exception SQL engine not supported
      * */
-    public static function factory()
+    public static function factory($configuration)
     {
-        switch (DB_ENGINE) {
+        switch ($configuration->db_engine) {
             case 'mysql':
-                return new CodePax_DbVersioning_SqlEngines_MySql();
+                return new CodePax_DbVersioning_SqlEngines_MySql($configuration);
             case 'pgsql':
-                return new CodePax_DbVersioning_SqlEngines_PgSql();
+                return new CodePax_DbVersioning_SqlEngines_PgSql($configuration);
             case 'sqlsrv':
-                return new CodePax_DbVersioning_SqlEngines_SqlSrv();
+                return new CodePax_DbVersioning_SqlEngines_SqlSrv($configuration);
             default:
                 throw new CodePax_DbVersioning_Exception('Unsupported SQL engine');
         }

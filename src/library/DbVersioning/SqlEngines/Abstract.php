@@ -30,6 +30,14 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
     const COMMAND_OUTPUT_LINES = 10;
 
     /**
+     * Holds the database configuration items for the
+     * current instance
+     *
+     * @var CodePax_Config
+     */
+    protected $configuration;
+
+    /**
      * Flag to indicate the platform the app
      * is running on
      * */
@@ -38,17 +46,17 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
     /**
      * Flag to indicate if we should use the log dir
      * for command output or not. This will be true
-     * if the directory is defined and is writeable
+     * if the directory is defined and is writable
      *
      */
     protected $use_logs_dir = false;
 
     /**
-     * Set the OS the app is running on
+     * Sets the platform we are running on and the configuration item
      *
-     * @return void
-     * */
-    public function __construct()
+     * @param $configuration
+     */
+    public function __construct($configuration)
     {
         // WIN detected
         if (strpos(strtolower(PHP_OS), 'win') !== false) {
@@ -58,6 +66,9 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
         if (defined('LOGS_DIR') && is_writable(LOGS_DIR)) {
             $this->use_logs_dir = true;
         }
+
+        //setup the configuration
+        $this->configuration = $configuration;
     }
 
     /**
@@ -80,6 +91,8 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
      * this will result "C:\path\to\cmd.exe /c the\actual\command\"
      *
      * @param string $_shell_command
+     *
+     * @return string
      * */
     protected function postFormatString($_shell_command)
     {
@@ -177,7 +190,7 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
      * @param string $_sql_file path to file to be executed
      * @return void
      * */
-    abstract protected function executeChangeScript($_sql_file);
+    abstract public function executeChangeScript($_sql_file);
 
     /**
      * Drop and create database. Will be used only
@@ -187,7 +200,7 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
      *
      * @return void
      * */
-    abstract protected function dropAndCreateDb();
+    abstract public function dropAndCreateDb();
 
     /**
      * Load and apply a baseline script
@@ -197,10 +210,10 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
      * time to apply a baseline script and that's
      * why a separate method was created
      *
-     * @param string $_baseline_file path to baseline
+     * @param string $_sql_file
      * @return void
      * */
-    abstract protected function executeBaseline($_sql_file);
+    abstract public function executeBaseline($_sql_file);
 
     /**
      * Will generate the baseline into baselines
@@ -212,7 +225,7 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
      * @param string $_target_sql_file
      * @return void
      * */
-    abstract protected function generateBaseline($_target_sql_file);
+    abstract public function generateBaseline($_target_sql_file);
 
     /**
      * Will generate the test data SQL file
@@ -235,7 +248,7 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
      * Using the Template design to enforce the
      * sequence of operations
      *
-     * @param string $_target_compressed_file
+     * @param string $_target_file
      * @return void
      * */
     public function generateTestData($_target_file)
@@ -260,7 +273,7 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
      * time to load the test data and that's
      * why a separate method was created
      *
-     * @param string $_test_data_file path to test data
+     * @param string $_sql_file path to test data
      * @return void
      * */
     abstract protected function loadSqlTestDataFile($_sql_file);
@@ -269,9 +282,9 @@ abstract class CodePax_DbVersioning_SqlEngines_Abstract
      * Load the zip or sql file and pass it
      * to SQL specific handler @see loadSqlTestDataFile
      *
-     * @param string $_source_file
-     * @return void
-     * */
+     * @param $_source_file
+     * @throws CodePax_DbVersioning_Exception
+     */
     public function loadTestData($_source_file)
     {
         if (defined('USE_TEST_DATA_COMPRESSION') && USE_TEST_DATA_COMPRESSION === true) {

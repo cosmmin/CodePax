@@ -25,31 +25,37 @@
  * */
 class CodePax_Sql
 {
-
     /**
      * @var PDO
      * */
     protected $db;
 
     /**
-     * Factory the PDO object and runs the setupTable
-     * command
-     *
-     * @return void
+     * @var CodePax_Config
      * */
-    public function __construct()
+    protected $configuration;
+
+    /**
+     * Sets up a connection to the database based on the configured engine
+     *
+     * @param CodePax_Config $configuration
+     */
+    public function __construct(CodePax_Config $configuration)
     {
+        // set the database configuration details
+        $this->configuration = $configuration;
+
         switch (DB_ENGINE) {
             case 'mysql':
                 $this->db = new PDO(
-                        sprintf('mysql:host=%s;dbname=%s', DB_HOST, DB_NAME), DB_USER, DB_PASS);
+                        sprintf('mysql:host=%s;dbname=%s', $this->configuration->db_host, $this->configuration->db_name), $this->configuration->db_user, $this->configuration->db_pass);
                 break;
             case 'pgsql':
                 $this->db = new PDO(
-                        sprintf('pgsql:host=%s;port=5432;dbname=%s', DB_HOST, DB_NAME), DB_USER, DB_PASS);
+                        sprintf('pgsql:host=%s;port=5432;dbname=%s', $this->configuration->db_host, $this->configuration->db_name), $this->configuration->db_user, $this->configuration->db_pass);
                 break;
             case 'sqlsrv':
-                $this->db = sqlsrv_connect(DB_HOST, array("Database" => DB_NAME, 'UID' => DB_USER, 'PWD' => DB_PASS, 'ConnectionPooling' => 0));
+                $this->db = sqlsrv_connect($this->configuration->db_host, array("Database" => $this->configuration->db_name, 'UID' => $this->configuration->db_user, 'PWD' => $this->configuration->db_pass, 'ConnectionPooling' => 0));
                 break;
         }
     }

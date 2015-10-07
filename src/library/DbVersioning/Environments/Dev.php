@@ -40,7 +40,7 @@ class CodePax_DbVersioning_Environments_Dev extends CodePax_DbVersioning_Environ
      * */
     private function generateTestData()
     {
-        $this->sql_engine->generateTestData(CodePax_DbVersioning_Files_Manager::getTestDataFile());
+        $this->sql_engine->generateTestData($this->filesManager->getTestDataFile());
         // commit the new test data
         if (defined('SVN_USER') || VERSIONING === 'SVN') {
             $svn_wrapper = new CodePax_Scm_Svn(SCM_USER, SCM_PASS, REPO_URL, PROJECT_DIR);
@@ -63,7 +63,7 @@ class CodePax_DbVersioning_Environments_Dev extends CodePax_DbVersioning_Environ
      * */
     private function applyBaseline()
     {
-        $baseline_path = CodePax_DbVersioning_Files_Manager::getBaselineByVersion($this->latest_db_version);
+        $baseline_path = $this->filesManager->getBaselineByVersion($this->latest_db_version);
         $this->sql_engine->executeBaseline($baseline_path);
         $this->db_versions_model->addVersion($this->latest_db_version, CodePax_DbVersions::TYPE_BASELINE);
         sleep(1);
@@ -77,7 +77,7 @@ class CodePax_DbVersioning_Environments_Dev extends CodePax_DbVersioning_Environ
     private function applyTestData()
     {
         // load and apply the test data
-        $test_data_path = CodePax_DbVersioning_Files_Manager::getTestDataFile();
+        $test_data_path = $this->filesManager->getTestDataFile();
         $this->sql_engine->loadTestData($test_data_path);
     }
 
@@ -93,8 +93,8 @@ class CodePax_DbVersioning_Environments_Dev extends CodePax_DbVersioning_Environ
 
         //for SQL Server get a new DB version model instance
         //SQL Server closes the connection if we drop the database
-        if (DB_ENGINE == 'sqlsrv') {
-            $this->db_versions_model = CodePax_DbVersions::factory();
+        if ($this->configuration->db_engine == 'sqlsrv') {
+            $this->db_versions_model = CodePax_DbVersions::factory($this->configuration);
         }
     }
 
@@ -111,7 +111,7 @@ class CodePax_DbVersioning_Environments_Dev extends CodePax_DbVersioning_Environ
      * */
     protected function setLatestDbVersion()
     {
-        $this->latest_db_version = CodePax_DbVersioning_Files_Manager::getLatestBaselineVersion();
+        $this->latest_db_version = $this->filesManager->getLatestBaselineVersion();
     }
 
     /**

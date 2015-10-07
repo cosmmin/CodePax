@@ -28,31 +28,23 @@ $view->setViewsPath(VIEWS_PATH);
 $view->setCurrentView('run_db_scripts');
 
 try {
-    $db_versioning_handler = CodePax_DbVersioning_Environments_Factory::factory(APPLICATION_ENVIRONMENT);
+    $configuration = CodePax_Config::getInstance(CONFIG_PATH . 'config.ini');
+    $dbVersioningService = new CodePax_DbVersioning_Service($configuration);
 
-    $generate_test_data = false;
-    // generate test data
-    if (APPLICATION_ENVIRONMENT == 'dev' && isset($_POST['preserve_test_data']) && $_POST['preserve_test_data'] == 1) {
-        $generate_test_data = true;
+    $preserveTestData = false;
+    if (isset($_POST['preserve_test_data'])) {
+        $preserveTestData = $_POST['preserve_test_data'];
     }
+    $result = $dbVersioningService->run($preserveTestData);
+    $view->db_scripts = $result;
 
-    // run the change scripts
-    $db_scripts_result = $db_versioning_handler->runScripts($generate_test_data);
-
-    // unset some keys that are redundant on DEV
-    unset($db_scripts_result['run_change_scripts'], $db_scripts_result['run_data_change_scripts']);
-
-    $view->db_scripts = $db_scripts_result;
 } catch (CodePax_DbVersioning_Exception $dbv_e) {
     $view->error_message = 'DB versioning error: ' . $dbv_e->getMessage();
-    $view->render();
-    exit();
 } catch (Exception $e) {
     $view->error_message = 'Generic error: ' . $e->getMessage();
-    $view->render();
-    exit();
 }
 
+//render the view
 try {
     $view->render();
 } catch (CodePax_View_Exception $e) {

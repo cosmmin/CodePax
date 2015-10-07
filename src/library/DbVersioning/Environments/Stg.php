@@ -115,7 +115,7 @@ class CodePax_DbVersioning_Environments_Stg extends CodePax_DbVersioning_Environ
         $baseline_version = $this->latest_db_version == '0.0.0' ? '1.0.0' : $this->incrementVersionNumber($this->latest_db_version);
 
         // generate baseline path
-        $baseline_absolute_path = CodePax_DbVersioning_Files_Manager::getPathToBaselines() .
+        $baseline_absolute_path = $this->filesManager->getPathToBaselines() .
                 DIRECTORY_SEPARATOR . $baseline_version . CodePax_DbVersioning_Files_Manager::SQL_FILE_EXTENSION;
 
         // factory the SQL engine object and generate baseline file

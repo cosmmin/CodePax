@@ -27,6 +27,21 @@ abstract class CodePax_DbVersioning_Environments_Abstract
 {
 
     /**
+     * Holds the configuration items for the database versioning service
+     *
+     * @var CodePax_Config
+     */
+    protected $configuration;
+
+    /**
+     * Holds an instance of the file manager
+     * for the current configuration
+     *
+     * @var CodePax_DbVersioning_Files_Manager
+     */
+    protected $filesManager;
+
+    /**
      * Latest structure version
      *
      * @var string xx.yy.zz
@@ -75,17 +90,24 @@ abstract class CodePax_DbVersioning_Environments_Abstract
     protected $results = array();
 
     /**
-     * Create required instances
+     * Class constructor for the environment object
      *
-     * @return void
-     * */
-    public function __construct()
+     * @param $configuration
+     * @throws CodePax_DbVersioning_Exception
+     */
+    public function __construct($configuration)
     {
+        // set the configuration param
+        $this->configuration = $configuration;
+
+        // set the files manager instance
+        $this->filesManager = new CodePax_DbVersioning_Files_Manager($this->configuration);
+
         // create the sql handler
-        $this->sql_engine = CodePax_DbVersioning_SqlEngines_Factory::factory();
+        $this->sql_engine = CodePax_DbVersioning_SqlEngines_Factory::factory($this->configuration);
 
         // factory the Model that handles the versions table
-        $this->db_versions_model = CodePax_DbVersions::factory();
+        $this->db_versions_model = CodePax_DbVersions::factory($this->configuration);
 
         // set the structure version
         $this->setLatestDbVersion();
@@ -121,7 +143,7 @@ abstract class CodePax_DbVersioning_Environments_Abstract
      * @param bool[optional] $_generate_test_data flag to allow test data generation
      * @return array returns the @see $this->results
      * */
-    abstract protected function runScripts($_generate_test_data = false);
+    abstract public function runScripts($_generate_test_data = false);
 
     /**
      * Returns the structure related change scripts list from
@@ -142,7 +164,8 @@ abstract class CodePax_DbVersioning_Environments_Abstract
      * */
     final public function getChangeScripts()
     {
-        return CodePax_DbVersioning_Files_Manager::getChangeScriptsByVersion($this->latest_db_version);
+        $filesManager = new CodePax_DbVersioning_Files_Manager($this->configuration);
+        return $filesManager->getChangeScriptsByVersion($this->latest_db_version);
     }
 
     /**
@@ -164,7 +187,8 @@ abstract class CodePax_DbVersioning_Environments_Abstract
      * */
     final public function getDataChangeScripts()
     {
-        return CodePax_DbVersioning_Files_Manager::getDataChangeScriptsByVersion($this->latest_data_db_version);
+        $filesManager = new CodePax_DbVersioning_Files_Manager($this->configuration);
+        return $filesManager->getDataChangeScriptsByVersion($this->latest_data_db_version);
     }
 
     /**
@@ -200,7 +224,7 @@ abstract class CodePax_DbVersioning_Environments_Abstract
      * process and that is why it is being marked as protected
      *
      * The input array is identical with the one that
-     * @se getChangeScripts returns
+     * @see getChangeScripts returns
      *
      * @param array $_change_scripts
      * @return void

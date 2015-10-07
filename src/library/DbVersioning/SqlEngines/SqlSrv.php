@@ -39,7 +39,7 @@ class CodePax_DbVersioning_SqlEngines_SqlSrv extends CodePax_DbVersioning_SqlEng
     public function executeChangeScript($_sql_file)
     {
         $command_pattern = '%s -U %s -P %s -d %s -S %s -i %s 2>&1';
-        $shell_command = sprintf($command_pattern, PATH_TO_SQL_BIN, DB_USER, DB_PASS, DB_NAME, DB_HOST, $_sql_file);
+        $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_name, $this->configuration->db_host, $_sql_file);
 
         $this->runCommand($shell_command);
     }
@@ -56,13 +56,13 @@ class CodePax_DbVersioning_SqlEngines_SqlSrv extends CodePax_DbVersioning_SqlEng
     {
         // first drop the existing DB
         $drop_command_pattern = '%s -U %s -P %s -S %s -Q "ALTER DATABASE [%s] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;DROP DATABASE [%s];" 2>&1';
-        $drop_shell_command = sprintf($drop_command_pattern, PATH_TO_SQL_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME, DB_NAME);
+        $drop_shell_command = sprintf($drop_command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name, $this->configuration->db_name);
 
         $this->runCommand($drop_shell_command);
 
         // then recreate it from baseline
         $create_command_pattern = '%s -U %s -P %s -S %s -Q "CREATE DATABASE [%s]; ALTER DATABASE [%s] SET MULTI_USER;" 2>&1';
-        $create_shell_command = sprintf($create_command_pattern, PATH_TO_SQL_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME, DB_NAME);
+        $create_shell_command = sprintf($create_command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name, $this->configuration->db_name);
         $this->runCommand($create_shell_command);
     }
 
@@ -95,7 +95,7 @@ class CodePax_DbVersioning_SqlEngines_SqlSrv extends CodePax_DbVersioning_SqlEng
     public function generateBaseline($_target_sql_file)
     {
         $command_pattern = '"%s" script -U %s -P %s -S %s -d %s -schemaonly -targetserver %s -f %s 2>&1';
-        $shell_command = sprintf($command_pattern, PATH_TO_SQL_DUMP_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME, self::TARGETED_SQL_VERSION, $_target_sql_file);
+        $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_dump_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name, self::TARGETED_SQL_VERSION, $_target_sql_file);
 
         $this->runCommand($shell_command);
     }
@@ -118,7 +118,7 @@ class CodePax_DbVersioning_SqlEngines_SqlSrv extends CodePax_DbVersioning_SqlEng
         $this->dropTablesToIgnore();
 
         $command_pattern = '"%s" script -U %s -P %s -S %s -d %s -dataonly -targetserver %s -f %s 2>&1';
-        $shell_command = sprintf($command_pattern, PATH_TO_SQL_DUMP_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME, self::TARGETED_SQL_VERSION, $_target_sql_file);
+        $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_dump_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name, self::TARGETED_SQL_VERSION, $_target_sql_file);
 
         $this->runCommand($shell_command);
 
@@ -185,7 +185,7 @@ class CodePax_DbVersioning_SqlEngines_SqlSrv extends CodePax_DbVersioning_SqlEng
      * time to load the test data and that's
      * why a separate method was created
      *
-     * @param string $_test_data_file path to test data
+     * @param string $_sql_file path to test data
      * @return void
      * */
     protected function loadSqlTestDataFile($_sql_file)
@@ -196,14 +196,15 @@ class CodePax_DbVersioning_SqlEngines_SqlSrv extends CodePax_DbVersioning_SqlEng
     /**
      * Checks whether the supplied string contains
      * the string "Msg". The Sql Server returns this
-     * string when an error has occured
+     * string when an error has occurred
      *
+     * @param string $_output
      * @return bool
      * */
-    protected function isError($_string)
+    protected function isError($_output)
     {
         // no error
-        if (strpos($_string, 'Msg') === false) {
+        if (strpos($_output, 'Msg') === false) {
             return false;
         } else {
             return true;
@@ -222,7 +223,7 @@ class CodePax_DbVersioning_SqlEngines_SqlSrv extends CodePax_DbVersioning_SqlEng
 
         $drop_command_pattern = '%s -U %s -P %s -S %s -d %s -Q "DROP table [%s];" 2>&1';
         foreach ($this->getTablesToIgnore() as $table) {
-            $drop_shell_command = sprintf($drop_command_pattern, PATH_TO_SQL_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME, $table);
+            $drop_shell_command = sprintf($drop_command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name, $table);
 
             $this->runCommand($drop_shell_command);
         }
@@ -239,7 +240,7 @@ class CodePax_DbVersioning_SqlEngines_SqlSrv extends CodePax_DbVersioning_SqlEng
         $drop_command_pattern = '%s -U %s -P %s -S %s -d %s -Q "ALTER DATABASE [%s] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DECLARE @statement nvarchar(500);SELECT @statement = \'ALTER TABLE \' + OBJECT_NAME(parent_object_id) + \' DROP CONSTRAINT \' + name FROM sys.foreign_keys WHERE referenced_object_id = object_id(\'%s\'); EXECUTE sp_executesql @statement; ALTER DATABASE [%s] SET MULTI_USER;" 2>&1';
 
         foreach ($this->getTablesToIgnore() as $table) {
-            $drop_shell_command = sprintf($drop_command_pattern, PATH_TO_SQL_BIN, DB_USER, DB_PASS, DB_HOST, DB_NAME, DB_NAME, $table, DB_NAME);
+            $drop_shell_command = sprintf($drop_command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_user, $this->configuration->db_pass, $this->configuration->db_host, $this->configuration->db_name, $this->configuration->db_name, $table, $this->configuration->db_name);
 
             $this->runCommand($drop_shell_command);
         }

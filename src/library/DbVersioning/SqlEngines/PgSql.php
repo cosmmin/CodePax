@@ -36,7 +36,7 @@ class CodePax_DbVersioning_SqlEngines_PgSql extends CodePax_DbVersioning_SqlEngi
     public function executeChangeScript($_sql_file)
     {
         $command_pattern = '%s -h %s -U %s -f %s %s ';
-        $shell_command = sprintf($command_pattern, PATH_TO_SQL_BIN, DB_HOST, DB_USER, $_sql_file, DB_NAME);
+        $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_host, $this->configuration->db_user, $_sql_file, $this->configuration->db_name);
         $this->runCommand($shell_command);
     }
 
@@ -69,12 +69,12 @@ class CodePax_DbVersioning_SqlEngines_PgSql extends CodePax_DbVersioning_SqlEngi
 
         // drop the existing DB
         $drop_command_pattern = '%s -h %s -U %s -c "DROP DATABASE %s" ';
-        $drop_shell_command = sprintf($drop_command_pattern, PATH_TO_SQL_BIN, DB_HOST, DB_USER, DB_NAME);
+        $drop_shell_command = sprintf($drop_command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_host, $this->configuration->db_user, $this->configuration->db_name);
         $this->runCommand($drop_shell_command);
 
         // recreate it from baseline
         $create_command_pattern = '%s -h %s -U %s -c "CREATE DATABASE %s WITH OWNER = %s ENCODING = \'UTF8\'" ';
-        $create_shell_command = sprintf($create_command_pattern, PATH_TO_SQL_BIN, DB_HOST, DB_USER, DB_NAME, DB_USER);
+        $create_shell_command = sprintf($create_command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_host, $this->configuration->db_user, $this->configuration->db_name, $this->configuration->db_user);
         $this->runCommand($create_shell_command);
     }
 
@@ -92,7 +92,7 @@ class CodePax_DbVersioning_SqlEngines_PgSql extends CodePax_DbVersioning_SqlEngi
     public function executeBaseline($_baseline_file)
     {
         $command_pattern = '%s -h %s -U %s -f %s %s';
-        $shell_command = sprintf($command_pattern, PATH_TO_SQL_BIN, DB_HOST, DB_USER, $_baseline_file, DB_NAME);
+        $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_bin, $this->configuration->db_host, $this->configuration->db_user, $_baseline_file, $this->configuration->db_name);
         $this->runCommand($shell_command);
     }
 
@@ -109,7 +109,7 @@ class CodePax_DbVersioning_SqlEngines_PgSql extends CodePax_DbVersioning_SqlEngi
     public function generateBaseline($_target_sql_file)
     {
         $command_pattern = '%s -h %s -U %s -s -f %s %s ';
-        $shell_command = sprintf($command_pattern, PATH_TO_SQL_DUMP_BIN, DB_HOST, DB_USER, $_target_sql_file, DB_NAME);
+        $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_dump_bin, $this->configuration->db_host, $this->configuration->db_user, $_target_sql_file, $this->configuration->db_name);
         $this->runCommand($shell_command);
     }
 
@@ -130,7 +130,7 @@ class CodePax_DbVersioning_SqlEngines_PgSql extends CodePax_DbVersioning_SqlEngi
     {
         $ignore_pattern = $this->getIgnoreTablesOption('-T %s', false);
         $command_pattern = '%s -h %s %s -U %s -a -F c -f %s %s ';
-        $shell_command = sprintf($command_pattern, PATH_TO_SQL_DUMP_BIN, DB_HOST, $ignore_pattern, DB_USER, $_target_sql_file, DB_NAME);
+        $shell_command = sprintf($command_pattern, $this->configuration->path_to_sql_dump_bin, $this->configuration->db_host, $ignore_pattern, $this->configuration->db_user, $_target_sql_file, $this->configuration->db_name);
         $this->runCommand($shell_command);
     }
 
@@ -143,14 +143,14 @@ class CodePax_DbVersioning_SqlEngines_PgSql extends CodePax_DbVersioning_SqlEngi
      * we will simply replace pg_dump with pg_restore
      * in the command pattern
      *
-     * @param string $_test_data_file path to test data
+     * @param string $_sql_file path to test data
      * @return void
      * */
     protected function loadSqlTestDataFile($_sql_file)
     {
-        $pg_restore = str_replace('_dump', '_restore', PATH_TO_SQL_DUMP_BIN);
+        $pg_restore = str_replace('_dump', '_restore', $this->configuration->path_to_sql_dump_bin);
         $command_pattern = '%s -h %s -U %s -a -d %s -O --disable-triggers %s';
-        $shell_command = sprintf($command_pattern, $pg_restore, DB_HOST, DB_USER, DB_NAME, $_sql_file);
+        $shell_command = sprintf($command_pattern, $pg_restore, $this->configuration->db_host, $this->configuration->db_user, $this->configuration->db_name, $_sql_file);
         $this->runCommand($shell_command);
     }
 

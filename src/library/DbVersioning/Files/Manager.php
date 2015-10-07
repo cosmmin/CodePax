@@ -59,6 +59,15 @@ class CodePax_DbVersioning_Files_Manager
     protected static $test_data_file = '%s%s%stest_data%sdata%s';
 
     /**
+     * 
+     *
+     * @param CodePax_Config $configuration
+     */
+    public function __construct($configuration){
+        $this->configuration = $configuration;
+    }
+
+    /**
      * Return the full path to baseline
      * for the specified version
      *
@@ -66,9 +75,9 @@ class CodePax_DbVersioning_Files_Manager
      * @return string path\to\baseline\1.0.4.sql
      * @throws CodePax_DbVersioning_Exception no baseline found
      * */
-    public static function getBaselineByVersion($_version)
+    public function getBaselineByVersion($_version)
     {
-        $baseline_path = sprintf(self::$baselines_path, PROJECT_DIR, DB_VERSIONING_DIR, DIRECTORY_SEPARATOR)
+        $baseline_path = sprintf(self::$baselines_path, $this->configuration->project_dir, $this->configuration->db_versioning_dir, DIRECTORY_SEPARATOR)
                 . DIRECTORY_SEPARATOR . $_version . self::SQL_FILE_EXTENSION;
         if (is_file($baseline_path)) {
             return $baseline_path;
@@ -89,10 +98,10 @@ class CodePax_DbVersioning_Files_Manager
      *
      * @return string baseling version represented like x.y.z
      * */
-    public static function getLatestBaselineVersion()
+    public function getLatestBaselineVersion()
     {
         $baselines = array();
-        $baselines_path = sprintf(self::$baselines_path, PROJECT_DIR, DB_VERSIONING_DIR, DIRECTORY_SEPARATOR);
+        $baselines_path = sprintf(self::$baselines_path, $this->configuration->project_dir, $this->configuration->db_versioning_dir, DIRECTORY_SEPARATOR);
 
         if (is_dir($baselines_path)) {
             $handle = opendir($baselines_path);
@@ -118,11 +127,11 @@ class CodePax_DbVersioning_Files_Manager
      * @return string path\to\test_data\data.zip
      * @throws CodePax_DbVersioning_Exception no test data found
      * */
-    public static function getTestDataFile()
+    public function getTestDataFile()
     {
         $file_extension = defined('USE_TEST_DATA_COMPRESSION') === true && USE_TEST_DATA_COMPRESSION === true ? self::ARCHIVE_FILE_EXTENSION : self::SQL_FILE_EXTENSION;
 
-        $test_data_file = sprintf(self::$test_data_file, PROJECT_DIR, DB_VERSIONING_DIR, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $file_extension);
+        $test_data_file = sprintf(self::$test_data_file, $this->configuration->project_dir, $this->configuration->db_versioning_dir, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $file_extension);
 
         if (is_file($test_data_file)) {
             return $test_data_file;
@@ -145,7 +154,7 @@ class CodePax_DbVersioning_Files_Manager
      * @param string $_version comes like x.y.z
      * @return array
      * */
-    protected static function readChangeScriptsByVersion($_change_scripts_path, $_version)
+    protected function readChangeScriptsByVersion($_change_scripts_path, $_version)
     {
         $change_scripts = array();
         if (is_dir($_change_scripts_path)) {
@@ -177,9 +186,9 @@ class CodePax_DbVersioning_Files_Manager
      * @param string $_version comes like x.y.z
      * @return array
      * */
-    public static function getChangeScriptsByVersion($_version)
+    public function getChangeScriptsByVersion($_version)
     {
-        $change_scripts_path = sprintf(self::$change_scripts_path, PROJECT_DIR, DB_VERSIONING_DIR, DIRECTORY_SEPARATOR);
+        $change_scripts_path = sprintf(self::$change_scripts_path, $this->configuration->project_dir, $this->configuration->db_versioning_dir, DIRECTORY_SEPARATOR);
         return self::readChangeScriptsByVersion($change_scripts_path, $_version);
     }
 
@@ -196,9 +205,9 @@ class CodePax_DbVersioning_Files_Manager
      * @param string $_version comes like x.y.z
      * @return array
      * */
-    public static function getDataChangeScriptsByVersion($_version)
+    public function getDataChangeScriptsByVersion($_version)
     {
-        $data_change_scripts_path = sprintf(self::$data_change_scripts_path, PROJECT_DIR, DB_VERSIONING_DIR, DIRECTORY_SEPARATOR);
+        $data_change_scripts_path = sprintf(self::$data_change_scripts_path, $this->configuration->project_dir, $this->configuration->db_versioning_dir, DIRECTORY_SEPARATOR);
         return self::readChangeScriptsByVersion($data_change_scripts_path, $_version);
     }
 
@@ -207,9 +216,9 @@ class CodePax_DbVersioning_Files_Manager
      *
      * @return string
      * */
-    public static function getPathToBaselines()
+    public function getPathToBaselines()
     {
-        return sprintf(self::$baselines_path, PROJECT_DIR, DB_VERSIONING_DIR, DIRECTORY_SEPARATOR);
+        return sprintf(self::$baselines_path, $this->configuration->project_dir, $this->configuration->db_versioning_dir, DIRECTORY_SEPARATOR);
     }
 
 }
