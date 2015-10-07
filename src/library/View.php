@@ -48,9 +48,9 @@ class CodePax_View
     /**
      * The views path can be set in the constructor also
      *
-     * @param false|string $_views_path
-     * @return void
-     */
+     * @param boolean $_views_path
+     *
+     **/
     public function __construct($_views_path = false)
     {
         if ($_views_path) {
@@ -79,8 +79,8 @@ class CodePax_View
      *
      * @param string $_name The variable name
      * @param mixed $_value The variable value
-     * @throws View_Exception if the user tries to set a private or protected
-     * property directly
+     * @throws CodePax_View_Exception if the user tries to set a private or protected property directly
+     *
      */
     public function __set($_name, $_value)
     {
@@ -103,7 +103,7 @@ class CodePax_View
      * If true, the variable is returned, false otherwise.
      *
      * @param string $_name
-     * @return boo|mixed
+     * @return boolean|mixed
      */
     public function __get($_name)
     {
@@ -156,7 +156,7 @@ class CodePax_View
      * Render the current view and extracts the variables that were set.
      * If the corresponding view file does not exists an error is thrown
      *
-     * @throws View_Exception if the view file does not exists
+     * @throws CodePax_View_Exception if the view file does not exists
      */
     public function render()
     {
